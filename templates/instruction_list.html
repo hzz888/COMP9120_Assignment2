@@ -1,0 +1,55 @@
+{% include 'top.html' %}
+
+<div class="content">
+    <div class="container">
+        <h1 class="title" align="center">Investment Instructions</h1>
+        <div class="search">
+            <form class="search-top" method="POST" action="{{url_for('list_instruction')}}">
+                <input type="text" name="search" placeholder="Search Instructions" autofocus>
+                <button class="flat" type="submit">Find</button>
+                <div class="clear"></div>
+            </form>
+        </div>
+        <table class="styled">
+            <thead>
+                <tr>
+				    <th>ID</th>
+                    <th>Amount</th>
+                    <th>Frequency</th>
+                    <th>Expiry</th>
+                    <th>Customer</th>
+                    <th>ETF</th>
+					<th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                    {% for i in instruction %}
+                    <tr class='clickable-row' data-href="{{url_for('update_instruction', instruction_id=i.instruction_id, amount=i.amount, frequency=i.frequency, expirydate=i.expirydate, customer=i.customer, etf=i.etf, notes=i.notes)}}" method="GET">
+					    <td>{{ i.instruction_id }}</td>
+                        <td>{{ i.amount }}</td>
+                        <td>{{ i.frequency }}</td>
+                        <td>{{ i.expirydate }}</td>
+                        <td>{{ i.customer }}</td>
+                        <td>{{ i.etf }}</td>
+						<td>{{ i.notes }}</td>
+                    </tr>
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" defer="defer"> jQuery(document).ready(function($) {
+    $(".clickable-row").click(function() {
+        window.location = $(this).data("href");
+    });
+	$(".clickable-row").mouseover(function() {
+        $(this).css('background-color', '#eeeeee');
+    });
+	$(".clickable-row").mouseout(function() {
+        $(this).css('background-color', 'white');
+    });
+
+});
+</script>
+
+{% include 'bottom.html' %}

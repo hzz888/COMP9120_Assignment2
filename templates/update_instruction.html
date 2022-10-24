@@ -1,0 +1,41 @@
+{% include 'top.html' %}
+
+<div class="content">
+    <div class="container">
+        <h1 class="title" align="center">Update Instruction</h1>
+
+        <form class="newbooking pure-form pure-form-aligned" method="POST" action="{{url_for('update_instruction')}}">
+			<div class="pure-control-group">
+                <label for="instruction_id">ID:</label>
+                <input type="text" name="instruction_id" value="{{ instructionInfo.instruction_id }}" size="25" readonly required>
+            </div>
+            <div class="pure-control-group">
+                <label for="amount">Amount:</label>
+                <input type="text" name="amount" value= "{{ instructionInfo.amount }}" size="25" autofocus required>
+            </div>
+			<div class="pure-control-group">
+                <label for="frequency">Frequency:</label>
+                <input type="text" name="frequency" value="{{ instructionInfo.frequency }}" size="25" required>
+			</div>
+            <div class="pure-control-group">
+                <label for="expirydate">Expiry Date:</label>
+				<input type="date" name="expirydate" value="{{ instructionInfo.expirydate }}" size="25" required>
+            </div>
+            <div class="pure-control-group">
+                <label for="customer">Customer:</label>
+                <input type="text" name="customer" value="{{ instructionInfo.customer }}" size="25" required>
+			</div>
+			<div class="pure-control-group">
+                <label for="etf">ETF:</label>
+				<input type="text" name="etf" value="{{ instructionInfo.etf }}" size="25" required>
+            </div>
+			<div class="pure-control-group">
+                <label for="notes">Notes:</label>
+				<textarea name="notes" rows="5" cols="30">{{ instructionInfo.notes }}</textarea>
+            </div>
+            <button type="submit" class="flat">Update Instruction</button>
+        </form>
+    </div>
+</div>
+
+{% include 'bottom.html' %}

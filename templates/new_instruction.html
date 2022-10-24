@@ -1,0 +1,33 @@
+{% include 'top.html' %}
+
+<div class="content">
+    <div class="container">
+        <h1 class="title" align="center">New Instruction</h1>
+
+        <form class="newbooking pure-form pure-form-aligned" method="POST" action="{{url_for('new_instruction')}}">
+            <div class="pure-control-group">
+                <label for="amount">Amount:</label>
+                <input type="text" name="amount" size="25" autofocus required>
+            </div>
+			<div class="pure-control-group">
+                <label for="frequency">Frequency:</label>
+                <input type="text" name="frequency" size="25" required>
+            </div>
+            <div class="pure-control-group">
+                <label for="customer">Customer:</label>
+                <input type="text" name="customer" size="25" required>
+            </div>
+            <div class="pure-control-group">
+                <label for="etf">ETF:</label>
+                <input type="text" name="etf" size="25" required>
+            </div>
+            <div class="pure-control-group">
+                <label for="notes">Notes:</label>
+                <textarea name="notes" rows="5" cols="30"></textarea>
+            </div>
+            <button type="submit" class="flat">Add Instruction</button>
+        </form>
+    </div>
+</div>
+
+{% include 'bottom.html' %}
