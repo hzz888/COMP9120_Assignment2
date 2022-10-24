@@ -10,8 +10,8 @@ Connect to the database using the connection string
 '''
 def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
-    userid = "y22s2c9120_unikey"
-    passwd = ""
+    userid = "y22s2c9120_zhuo9903"
+    passwd = "qK4TdzhQ"
     myHost = "soit-db-pro-2.ucc.usyd.edu.au"
 
     # Create a connection to the database
@@ -22,6 +22,7 @@ def openConnection():
                                     user=userid,
                                     password=passwd,
                                     host=myHost)
+        curs = conn.cursor()
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
     
