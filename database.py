@@ -22,12 +22,15 @@ def openConnection():
                                     user=userid,
                                     password=passwd,
                                     host=myHost)
-        curs = conn.cursor()
+
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
     
     # return the connection to use
     return conn
+
+
+cursor = openConnection().cursor()
 
 '''
 Validate administrator based on login and password

@@ -3,7 +3,7 @@ from routes import *
 # Starting the Python application
 if __name__ == '__main__':
     # Step 1: Change this port number if needed
-    PORT_NUMBER = 5000
+    PORT_NUMBER = 8888
 
     print("-"*70)
     print("""Welcome to SharePlus Online Trading.\n
