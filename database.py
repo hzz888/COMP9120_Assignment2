@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import psycopg2
-from datetime import datetime
 #####################################################
 ##  Database Connection
 #####################################################
@@ -48,24 +47,6 @@ def checkAdmCredentials(login, password):
 '''
 List all the associated instructions in the database by administrator
 '''
-
-
-# def findCustomerNameByLogin(customer_login):
-#     cursor.execute("SELECT firstname, lastname FROM customer WHERE login = %s", (customer_login,))
-#     customer_name = cursor.fetchone()
-#     return customer_name[0] + '/n' + customer_name[1]
-
-
-# def findEtfNameByCode(etf_code):
-#     cursor.execute("SELECT name FROM etf WHERE code = %s", (etf_code,))
-#     return cursor.fetchone()[0]
-#
-#
-# def getFrequencyDesc(frequency_code):
-#     cursor.execute("SELECT frequencydesc FROM frequency WHERE frequencycode = %s", (frequency_code,))
-#     return cursor.fetchone()[0]
-
-
 def findInstructionsByAdm(login):
     connection = openConnection()
     cursor = connection.cursor()
