@@ -114,7 +114,8 @@ INSERT INTO InvestInstruction (Amount, Frequency, ExpiryDate, Customer, Administ
 COMMIT;
 
 
-CREATE OR REPLACE FUNCTION setExpiryDate() RETURN TRIGGER AS $$
+CREATE OR REPLACE FUNCTION setExpiryDate() RETURNS TRIGGER AS
+$$
 BEGIN
 	IF NEW.ExpiryDate IS NULL THEN
 		NEW.ExpiryDate = CURRENT_DATE + INTERVAL '12 months';
@@ -122,9 +123,3 @@ BEGIN
 	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER setExpiryDateTrigger 
-BEFORE INSERT 
-ON InvestInstruction 
-FOR EACH ROW 
-EXECUTE PROCEDURE setExpiryDate();
