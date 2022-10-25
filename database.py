@@ -36,17 +36,46 @@ cursor = openConnection().cursor()
 Validate administrator based on login and password
 '''
 def checkAdmCredentials(login, password):
+    cursor.execute("SELECT * FROM administrator WHERE login = %s AND password = %s", (login, password))
+    return cursor.fetchone()
 
-    return ['daegis', 'adm222', 'Derien', 'Aegis', 'derien.aegis@yahoomail.com', 95700.15]
 
 
 '''
 List all the associated instructions in the database by administrator
 '''
+
+
+def findCustomerNameByLogin(customer_login):
+    cursor.execute("SELECT firstname, lastname FROM customer WHERE login = %s", (customer_login,))
+    return cursor.fetchone()[0] + "/n" + cursor.fetchone()[1]
+
+
+def findEtfNameByCode(etf_code):
+    cursor.execute("SELECT name FROM etf WHERE code = %s", (etf_code,))
+    return cursor.fetchone()[0]
+
+
 def findInstructionsByAdm(login):
+    all_instructions = []
+    cursor.execute("SELECT * FROM investinstruction WHERE administrator = %s order by expirydate asc, customer desc ", (login,))
+    for instrunction in cursor.fetchall():
+        instrunction_id = instrunction[0]
+        amount = instrunction[1]
+        frequency = instrunction[2]
+        expirydate = instrunction[3]
+        customer_login = instrunction[4]
+        customer_name = findCustomerNameByLogin(customer_login)
+        etf_code = instrunction[5]
+        etf_name = findEtfNameByCode(etf_code)
+        notes = instrunction[6]
+        instruction_dict = {'instrction_id': instrunction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer_name, 'etf': etf_name, 'notes': notes}
+        all_instructions.append(instruction_dict)
 
-    return
-
+    if len(all_instructions) == 0:
+        return None
+    else:
+        return all_instructions
 
 '''
 Find a list of instructions based on the searchString provided as parameter
