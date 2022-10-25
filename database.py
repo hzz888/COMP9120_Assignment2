@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import psycopg2
-
+from datetime import datetime
 #####################################################
 ##  Database Connection
 #####################################################
@@ -46,31 +46,72 @@ List all the associated instructions in the database by administrator
 '''
 
 
-def findCustomerNameByLogin(customer_login):
-    cursor.execute("SELECT firstname, lastname FROM customer WHERE login = %s", (customer_login,))
-    return cursor.fetchone()[0] + "/n" + cursor.fetchone()[1]
+# def findCustomerNameByLogin(customer_login):
+#     cursor.execute("SELECT firstname, lastname FROM customer WHERE login = %s", (customer_login,))
+#     customer_name = cursor.fetchone()
+#     return customer_name[0] + '/n' + customer_name[1]
 
 
-def findEtfNameByCode(etf_code):
-    cursor.execute("SELECT name FROM etf WHERE code = %s", (etf_code,))
-    return cursor.fetchone()[0]
+# def findEtfNameByCode(etf_code):
+#     cursor.execute("SELECT name FROM etf WHERE code = %s", (etf_code,))
+#     return cursor.fetchone()[0]
+#
+#
+# def getFrequencyDesc(frequency_code):
+#     cursor.execute("SELECT frequencydesc FROM frequency WHERE frequencycode = %s", (frequency_code,))
+#     return cursor.fetchone()[0]
 
 
 def findInstructionsByAdm(login):
     all_instructions = []
-    cursor.execute("SELECT * FROM investinstruction WHERE administrator = %s order by expirydate asc, customer desc ", (login,))
-    for instrunction in cursor.fetchall():
-        instrunction_id = instrunction[0]
-        amount = instrunction[1]
-        frequency = instrunction[2]
-        expirydate = instrunction[3]
-        customer_login = instrunction[4]
-        customer_name = findCustomerNameByLogin(customer_login)
-        etf_code = instrunction[5]
-        etf_name = findEtfNameByCode(etf_code)
-        notes = instrunction[6]
-        instruction_dict = {'instrction_id': instrunction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer_name, 'etf': etf_name, 'notes': notes}
-        all_instructions.append(instruction_dict)
+    # cursor.execute("SELECT * FROM investinstruction WHERE administrator = %s order by expirydate asc, customer desc ", (login,))
+    cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
+                        FROM InvestInstruction i
+                        JOIN Customer c ON (Customer=Login)
+                        JOIN ETF e USING (Code)
+                        JOIN Frequency f ON(i.frequency = f.frequencycode) 
+                        WHERE Administrator = %s AND ExpiryDate >= CURRENT_DATE
+                        ORDER BY ExpiryDate, Customer DESC''', (login,))
+    
+    for instruction in cursor.fetchall():
+        instruction_id = instruction[0]
+        amount = instruction[1]
+        frequency = instruction[2]
+        expirydate = instruction[3]
+        expirydate = expirydate.strftime("%d-%m-%Y")
+        customer = instruction[4]
+        etf = instruction[5]
+        if instruction[6] == None:
+            notes = ''
+        else:
+            notes = instruction[6]
+        instruction_dict_valid = {'instruction_id': instruction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer, 'etf': etf, 'notes': notes}
+        all_instructions.append(instruction_dict_valid)
+
+    cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
+                    FROM InvestInstruction i
+                    JOIN Customer c ON (Customer=Login)
+                    JOIN ETF e USING (Code)
+                    JOIN Frequency f ON(i.frequency = f.frequencycode) 
+                    WHERE Administrator = %s AND ExpiryDate < CURRENT_DATE
+                    ORDER BY ExpiryDate, Customer DESC''', (login,))
+        
+    for instruction in cursor.fetchall():
+        instruction_id = instruction[0]
+        amount = instruction[1]
+        frequency = instruction[2]
+        expirydate = instruction[3]
+        expirydate = expirydate.strftime("%d-%m-%Y")
+        customer = instruction[4]
+        etf = instruction[5]
+        if instruction[6] == None:
+            notes = ''
+        else:
+            notes = instruction[6]
+        instruction_dict_invalid = {'instruction_id': instruction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer, 'etf': etf, 'notes': notes}
+        all_instructions.append(instruction_dict_invalid)
+
+
 
     if len(all_instructions) == 0:
         return None
