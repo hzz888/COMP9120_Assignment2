@@ -30,15 +30,19 @@ def openConnection():
     return conn
 
 
-cursor = openConnection().cursor()
 
 '''
 Validate administrator based on login and password
 '''
 def checkAdmCredentials(login, password):
+    connection = openConnection()
+    cursor = connection.cursor()
     cursor.execute("SELECT * FROM administrator WHERE login = %s AND password = %s", (login, password))
-    return cursor.fetchone()
-
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return result
+    
 
 
 '''
@@ -63,8 +67,11 @@ List all the associated instructions in the database by administrator
 
 
 def findInstructionsByAdm(login):
+    connection = openConnection()
+    cursor = connection.cursor()
+    
     all_instructions = []
-    # cursor.execute("SELECT * FROM investinstruction WHERE administrator = %s order by expirydate asc, customer desc ", (login,))
+    
     cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
                         FROM InvestInstruction i
                         JOIN Customer c ON (Customer=Login)
@@ -111,8 +118,9 @@ def findInstructionsByAdm(login):
         instruction_dict_invalid = {'instruction_id': instruction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer, 'etf': etf, 'notes': notes}
         all_instructions.append(instruction_dict_invalid)
 
-
-
+    cursor.close()
+    connection.close()
+    
     if len(all_instructions) == 0:
         return None
     else:
@@ -123,16 +131,85 @@ Find a list of instructions based on the searchString provided as parameter
 See assignment description for search specification
 '''
 def findInstructionsByCriteria(searchString):
+    connection = openConnection()
+    cursor = connection.cursor()
+    
+    found_instructions = []
+    
+    cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
+                    FROM InvestInstruction i
+                    JOIN Customer c ON (Customer=Login)
+                    JOIN ETF e USING (Code)
+                    JOIN Frequency f ON(i.frequency = f.frequencycode) 
+                    WHERE (CONCAT(c.FirstName, ' ', c.LastName) ILIKE '%%' || %s || '%%' OR e.name ILIKE '%%' || %s || '%%' OR i.notes ILIKE '%%' || %s || '%%') AND i.ExpiryDate >= CURRENT_DATE AND i.Administrator IS NULL
+                    ORDER BY ExpiryDate''', (searchString,searchString,searchString))
+    
+    for instruction in cursor.fetchall():
+        instruction_id = instruction[0]
+        amount = instruction[1]
+        frequency = instruction[2]
+        expirydate = instruction[3]
+        expirydate = expirydate.strftime("%d-%m-%Y")
+        customer = instruction[4]
+        etf = instruction[5]
+        if instruction[6] == None:
+            notes = ''
+        else:
+            notes = instruction[6]
+        instruction_dict = {'instruction_id': instruction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer, 'etf': etf, 'notes': notes}
+        found_instructions.append(instruction_dict)
 
-    return
+    cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
+                    FROM InvestInstruction i
+                    JOIN Customer c ON (Customer=Login)
+                    JOIN ETF e USING (Code)
+                    JOIN Frequency f ON(i.frequency = f.frequencycode) 
+                    WHERE (CONCAT(c.FirstName, ' ', c.LastName) ILIKE '%%' || %s || '%%' OR e.name ILIKE '%%' || %s || '%%' OR i.Notes ILIKE '%%' || %s || '%%') AND i.ExpiryDate >= CURRENT_DATE AND i.Administrator IS NOT NULL
+                    ORDER BY ExpiryDate''', (searchString,searchString,searchString))
+    
+    for instruction in cursor.fetchall():
+        instruction_id = instruction[0]
+        amount = instruction[1]
+        frequency = instruction[2]
+        expirydate = instruction[3]
+        expirydate = expirydate.strftime("%d-%m-%Y")
+        customer = instruction[4]
+        etf = instruction[5]
+        if instruction[6] == None:
+            notes = ''
+        else:
+            notes = instruction[6]
+        instruction_dict = {'instruction_id': instruction_id, 'amount': amount, 'frequency': frequency, 'expirydate': expirydate, 'customer': customer, 'etf': etf, 'notes': notes}
+        found_instructions.append(instruction_dict)
 
+    cursor.close()
+    connection.close()
+    
+    return found_instructions
 
 '''
 Add a new instruction
 '''
 def addInstruction(amount, frequency, customer, administrator, etf, notes):
-
-    return
+    connection = openConnection()
+    cursor = connection.cursor()
+    try:
+        cursor.execute('''INSERT INTO InvestInstruction (Amount, Frequency, Customer, Administrator, Code, Notes) 
+                    VALUES (%s, %s, %s, %s, %s, %s)''', (amount, frequency, customer, administrator, etf, notes))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return True
+    
+    except psycopg2.Error as sqle:
+        connection.rollback()
+        cursor.close()
+        connection.close()
+        
+        print(sqle.pgerror)
+        return False
+        #return sqle.pgerror
 
 
 '''

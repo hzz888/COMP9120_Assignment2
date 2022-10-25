@@ -112,3 +112,19 @@ INSERT INTO InvestInstruction (Amount, Frequency, ExpiryDate, Customer, Administ
 INSERT INTO InvestInstruction (Amount, Frequency, ExpiryDate, Customer, Administrator, Code, Notes) VALUES (2400, 'FTH', '19/12/2023', 'mchan2', NULL, 'SFY', 'Previous instruction was cancelled.');	        	--10
 
 COMMIT;
+
+
+CREATE OR REPLACE FUNCTION setExpiryDate() RETURN TRIGGER AS $$
+BEGIN
+	IF NEW.ExpiryDate IS NULL THEN
+		NEW.ExpiryDate = CURRENT_DATE + INTERVAL '12 months';
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER setExpiryDateTrigger 
+BEFORE INSERT 
+ON InvestInstruction 
+FOR EACH ROW 
+EXECUTE PROCEDURE setExpiryDate();
