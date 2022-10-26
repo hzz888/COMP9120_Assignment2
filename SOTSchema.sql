@@ -114,12 +114,42 @@ INSERT INTO InvestInstruction (Amount, Frequency, ExpiryDate, Customer, Administ
 COMMIT;
 
 
-CREATE OR REPLACE FUNCTION setExpiryDate() RETURNS TRIGGER AS
-$$
+
+
+CREATE OR REPLACE FUNCTION addInstruction(amount DECIMAL(12,2), frequency text, customer VARCHAR(20), administrator VARCHAR(20), etf VARCHAR(5), notes VARCHAR(200))
+RETURNS VOID AS $$
+DECLARE
+    defaultExpiryDate DATE;
 BEGIN
-	IF NEW.ExpiryDate IS NULL THEN
-		NEW.ExpiryDate = CURRENT_DATE + INTERVAL '12 months';
-	END IF;
-	RETURN NEW;
+    defaultExpiryDate := CURRENT_DATE + INTERVAL '12 months';
+
+    etf := UPPER(etf);
+
+    IF LOWER(frequency) = 'monthly' THEN
+        frequency := 'MTH';
+    END IF;
+    IF LOWER(frequency) = 'fortnightly' THEN
+        frequency := 'FTH';
+    END IF;
+
+    INSERT INTO InvestInstruction(Amount, Frequency, ExpiryDate, Customer, Administrator, Code, Notes)
+                VALUES(amount, frequency, defaultExpiryDate, customer, administrator, etf, notes);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION updateInstruction(iid INTEGER, amt DECIMAL(12,2), fre text, expiry DATE, cus VARCHAR(20), adm VARCHAR(20), etf VARCHAR(5), note VARCHAR(200))
+RETURNS VOID AS $$
+BEGIN
+    IF LOWER(fre) = 'monthly' THEN fre := 'MTH';
+    END IF;
+    IF LOWER(fre) = 'fortnightly' THEN fre := 'FTH';
+    END IF;
+
+    etf := UPPER(etf);
+
+    UPDATE InvestInstruction i
+    SET Amount = amt, Frequency = fre, ExpiryDate = expiry, Customer = cus, Administrator = adm, Code = etf, Notes = note
+    WHERE i.InstructionId = iid;
 END;
 $$ LANGUAGE plpgsql;
