@@ -52,7 +52,6 @@ List all the associated instructions in the database by administrator
 '''
 
 
-# noinspection DuplicatedCode
 def findInstructionsByAdm(login):
     connection = openConnection()
     cursor = connection.cursor()
@@ -61,11 +60,11 @@ def findInstructionsByAdm(login):
 
     cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
                         FROM InvestInstruction i
-                        JOIN Customer c ON (Customer=Login)
+                        JOIN Customer c ON (i.Customer=c.Login)
                         JOIN ETF e USING (Code)
                         JOIN Frequency f ON(i.frequency = f.frequencycode) 
-                        WHERE Administrator = %s AND ExpiryDate >= CURRENT_DATE
-                        ORDER BY ExpiryDate, Customer DESC''', (login,))
+                        WHERE i.Administrator = %s AND i.ExpiryDate >= CURRENT_DATE
+                        ORDER BY i.ExpiryDate, CONCAT(c.FirstName, ' ', c.LastName) DESC''', (login,))
 
     for instruction in cursor.fetchall():
         instruction_id = instruction[0]
@@ -85,11 +84,11 @@ def findInstructionsByAdm(login):
 
     cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
                     FROM InvestInstruction i
-                    JOIN Customer c ON (Customer=Login)
+                    JOIN Customer c ON (i.Customer=c.Login)
                     JOIN ETF e USING (Code)
                     JOIN Frequency f ON(i.frequency = f.frequencycode) 
-                    WHERE Administrator = %s AND ExpiryDate < CURRENT_DATE
-                    ORDER BY ExpiryDate, Customer DESC''', (login,))
+                    WHERE i.Administrator = %s AND i.ExpiryDate < CURRENT_DATE
+                    ORDER BY i.ExpiryDate, CONCAT(c.FirstName, ' ', c.LastName) DESC''', (login,))
 
     for instruction in cursor.fetchall():
         instruction_id = instruction[0]
@@ -130,11 +129,11 @@ def findInstructionsByCriteria(searchString):
 
     cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
                     FROM InvestInstruction i
-                    JOIN Customer c ON (Customer=Login)
+                    JOIN Customer c ON (i.Customer=c.Login)
                     JOIN ETF e USING (Code)
                     JOIN Frequency f ON(i.frequency = f.frequencycode) 
                     WHERE (CONCAT(c.FirstName, ' ', c.LastName) ILIKE '%%' || %s || '%%' OR e.name ILIKE '%%' || %s || '%%' OR i.notes ILIKE '%%' || %s || '%%') AND i.ExpiryDate >= CURRENT_DATE AND i.Administrator IS NULL
-                    ORDER BY ExpiryDate''', (searchString, searchString, searchString))
+                    ORDER BY i.ExpiryDate''', (searchString, searchString, searchString))
 
     for instruction in cursor.fetchall():
         instruction_id = instruction[0]
@@ -154,11 +153,11 @@ def findInstructionsByCriteria(searchString):
 
     cursor.execute('''SELECT i.InstructionId AS ID, i.Amount AS amount, f.frequencydesc AS frequency, i.ExpiryDate AS Expiry, CONCAT(c.FirstName, ' ', c.LastName) AS Customer, e.Name AS ETF, i.Notes
                     FROM InvestInstruction i
-                    JOIN Customer c ON (Customer=Login)
+                    JOIN Customer c ON (i.Customer=c.Login)
                     JOIN ETF e USING (Code)
                     JOIN Frequency f ON(i.frequency = f.frequencycode) 
                     WHERE (CONCAT(c.FirstName, ' ', c.LastName) ILIKE '%%' || %s || '%%' OR e.name ILIKE '%%' || %s || '%%' OR i.Notes ILIKE '%%' || %s || '%%') AND i.ExpiryDate >= CURRENT_DATE AND i.Administrator IS NOT NULL
-                    ORDER BY ExpiryDate''', (searchString, searchString, searchString))
+                    ORDER BY i.ExpiryDate''', (searchString, searchString, searchString))
 
     for instruction in cursor.fetchall():
         instruction_id = instruction[0]
@@ -196,7 +195,7 @@ def addInstruction(amount, frequency, customer, administrator, etf, notes):
         connection.rollback()
         cursor.close()
         connection.close()
-        print(sqle)
+        # print(sqle)
         return False
 
 
@@ -215,5 +214,5 @@ def updateInstruction(instructionid, amount, frequency, expirydate, customer, ad
         connection.rollback()
         cursor.close()
         connection.close()
-        print(sqle)
+        # print(sqle)
         return False
