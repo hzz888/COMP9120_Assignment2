@@ -170,7 +170,7 @@ def update_instruction():
             flash("You do not have access to update that record!")
             return (redirect(url_for('index')))
 
-            # Otherwise, if instruction details can be retrieved
+        # Otherwise, if instruction details can be retrieved
         times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
         return render_template('update_instruction.html', instructionInfo=instruction, user=user_details, times=times,
                                session=session, page=page)
