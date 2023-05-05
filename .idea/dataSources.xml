@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://soit-db-pro-2.ucc.usyd.edu.au:5432/y22s2c9120_zhuo9903</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="txy_pgsql" uuid="f0ddc861-8a16-4ef1-a247-5d9432036fe8">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://81.69.247.130:55435/postgres</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
